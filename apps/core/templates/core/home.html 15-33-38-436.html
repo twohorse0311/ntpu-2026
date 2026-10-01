@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>麻將狗｜麻將計分與對局紀錄</title>
+  <meta name="description" content="麻將狗是一個讓固定牌友記錄麻將對局分數、管理房間與查看戰績走勢的免費工具。" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --paper: #f7f3ea;
+      --paper-card: #fffdf8;
+      --ink: #292929;
+      --muted: #77736b;
+      --line: #ddd7cc;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.7), transparent 26rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    .paper-card {
+      background: rgba(255, 253, 248, .86);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 36px rgba(55, 48, 38, .05);
+    }
+
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: var(--blue);
+      color: white;
+      padding: .85rem 1.35rem;
+      font-weight: 700;
+      transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
+      box-shadow: 0 8px 22px rgba(37, 99, 235, .16);
+    }
+
+    .primary-btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(37, 99, 235, .22);
+    }
+
+    .phone {
+      width: min(100%, 250px);
+      height: 330px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 2px solid #343434;
+      border-radius: 30px;
+      background: #272727;
+      box-shadow: 0 16px 30px rgba(0,0,0,.09);
+    }
+
+    .phone-screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 21px;
+      background: #fbfaf6;
+      padding: 28px 14px 14px;
+    }
+
+    .phone-screen::before {
+      content: "";
+      position: absolute;
+      width: 66px;
+      height: 5px;
+      border-radius: 99px;
+      background: #333;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .mock-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e7e1d8;
+      font-size: 12px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #e8edf8;
+      color: #315fae;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .score-pill {
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: #e9f0ff;
+      color: #2859b7;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .chart {
+      position: relative;
+      height: 135px;
+      margin-top: 20px;
+      border-left: 1px solid #ddd7cc;
+      border-bottom: 1px solid #ddd7cc;
+      background:
+        linear-gradient(to bottom, transparent 32%, #ebe6de 33%, transparent 34%, transparent 65%, #ebe6de 66%, transparent 67%);
+    }
+
+    .chart svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .carousel-track {
+      transition: transform .35s cubic-bezier(.22,.61,.36,1);
+    }
+
+    .carousel-card {
+      min-width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .carousel-track {
+        transform: none !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+
+      .carousel-card {
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <!-- Hero -->
+    <section class="min-h-[78vh] flex items-center px-6 py-24 md:py-32">
+      <div class="mx-auto max-w-4xl text-center">
+        <div class="mb-7 inline-flex rounded-full border border-stone-300/80 bg-white/40 px-4 py-2 text-xs font-semibold tracking-[.18em] text-stone-500">
+          麻將狗 · 免費對局紀錄工具
+        </div>
+        <h1 class="text-4xl font-black tracking-tight md:text-6xl lg:text-7xl">
+          麻將計分與對局紀錄
+        </h1>
+        <p class="mx-auto mt-6 max-w-2xl text-base leading-8 text-stone-500 md:text-xl">
+          紀錄每一場的對局結果，追蹤你的戰績
+        </p>
+        <button class="primary-btn js-start mt-9" type="button">開始使用 →</button>
+      </div>
+    </section>
+
+    <!-- Pain point -->
+    <section class="px-6 py-20 md:py-28">
+      <div class="mx-auto max-w-3xl text-center">
+        <p class="mb-4 text-sm font-bold tracking-[.16em] text-blue-600">不用再翻舊帳</p>
+        <h2 class="text-3xl font-black tracking-tight md:text-5xl">還在用紙筆或記憶算分？</h2>
+        <p class="mx-auto mt-7 max-w-2xl text-base leading-8 text-stone-500 md:text-lg">
+          紙張容易不見、記事本越記越亂，Excel 又常常要回家才能整理。
+          麻將狗把每次對局、固定牌友與歷史戰績放在同一個地方，打完就記，之後想看隨時都找得到。
+        </p>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="px-6 py-20 md:py-28" aria-labelledby="features-title">
+      <div class="mx-auto max-w-6xl">
+        <div class="mb-12 text-center md:mb-16">
+          <p class="mb-3 text-sm font-bold tracking-[.16em] text-blue-600">核心功能</p>
+          <h2 id="features-title" class="text-3xl font-black md:text-5xl">簡單記，清楚看</h2>
+        </div>
+
+        <div class="overflow-hidden md:overflow-visible">
+          <div id="carouselTrack" class="carousel-track flex md:grid">
+            <!-- Card 1 -->
+            <article class="carousel-card px-1 md:px-0">
+              <div class="paper-card h-full rounded-[28px] p-5 md:p-6">
+                <div class="phone">
+                  <div class="phone-screen">
+                    <div class="text-[11px] font-bold text-stone-400">今晚的牌局</div>
+                    <div class="mt-1 text-sm font-black">第 6 局</div>
+                    <div class="mt-4">
+                      <div class="mock-row">
+                        <span class="flex items-center gap-2"><span class="avatar">阿</span>阿明</span>
+                        <span class="score-pill">+24</span>
+                      </div>
+                      <div class="mock-row">
+                        <span class="flex items-center gap-2"><span class="avatar">狗</span>麻將狗</span>
+                        <span class="font-bold text-stone-500">+8</span>
+                      </div>
+                      <div class="mock-row">
+                        <span class="flex items-center gap-2"><span class="avatar">小</span>小林</span>
+                        <span class="font-bold text-stone-500">-12</span>
+                      </div>
+                      <div class="mock-row">
+                        <span class="flex items-center gap-2"><span class="avatar">老</span>老王</span>
+                        <span class="font-bold text-stone-500">-20</span>
+                      </div>
+                    </div>
+                    <div class="mt-5 rounded-xl bg-blue-600 py-2 text-center text-[11px] font-bold text-white">記錄這一局</div>
+                  </div>
+                </div>
+                <h3 class="mt-7 text-xl font-black">計分追蹤</h3>
+                <p class="mt-3 leading-7 text-stone-500">每局快速輸入分數，保留完整對局紀錄，不再靠記憶回想誰輸誰贏。</p>
+              </div>
+            </article>
+
+            <!-- Card 2 -->
+            <article class="carousel-card px-1 md:px-0">
+              <div class="paper-card h-full rounded-[28px] p-5 md:p-6">
+                <div class="phone">
+                  <div class="phone-screen">
+                    <div class="text-[11px] font-bold text-stone-400">我的房間</div>
+                    <div class="mt-1 text-sm font-black">週五固定團</div>
+                    <div class="mt-5 grid grid-cols-2 gap-3">
+                      <div class="rounded-2xl border border-stone-200 bg-white p-3 text-center">
+                        <div class="avatar mx-auto">狗</div><div class="mt-2 text-[11px] font-bold">麻將狗</div>
+                      </div>
+                      <div class="rounded-2xl border border-stone-200 bg-white p-3 text-center">
+                        <div class="avatar mx-auto">阿</div><div class="mt-2 text-[11px] font-bold">阿明</div>
+                      </div>
+                      <div class="rounded-2xl border border-stone-200 bg-white p-3 text-center">
+                        <div class="avatar mx-auto">小</div><div class="mt-2 text-[11px] font-bold">小林</div>
+                      </div>
+                      <div class="rounded-2xl border border-stone-200 bg-white p-3 text-center">
+                        <div class="avatar mx-auto">老</div><div class="mt-2 text-[11px] font-bold">老王</div>
+                      </div>
+                    </div>
+                    <div class="mt-5 rounded-xl border border-dashed border-stone-300 py-2 text-center text-[11px] font-bold text-stone-500">＋ 邀請牌友</div>
+                  </div>
+                </div>
+                <h3 class="mt-7 text-xl font-black">房間管理</h3>
+                <p class="mt-3 leading-7 text-stone-500">替固定牌咖建立房間，把常玩的成員與每次牌局整理在一起，開局更快。</p>
+              </div>
+            </article>
+
+            <!-- Card 3 -->
+            <article class="carousel-card px-1 md:px-0">
+              <div class="paper-card h-full rounded-[28px] p-5 md:p-6">
+                <div class="phone">
+                  <div class="phone-screen">
+                    <div class="text-[11px] font-bold text-stone-400">近 8 場表現</div>
+                    <div class="mt-1 flex items-end gap-2">
+                      <span class="text-2xl font-black">+126</span>
+                      <span class="mb-1 text-[10px] font-bold text-blue-600">↑ 本月</span>
+                    </div>
+                    <div class="chart">
+                      <svg viewBox="0 0 220 135" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="0,108 30,96 62,105 94,68 126,79 158,44 190,54 220,22"
+                          fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="mt-5 flex justify-between text-center">
+                      <div><div class="text-[10px] text-stone-400">勝場</div><div class="text-sm font-black">5</div></div>
+                      <div><div class="text-[10px] text-stone-400">場次</div><div class="text-sm font-black">8</div></div>
+                      <div><div class="text-[10px] text-stone-400">趨勢</div><div class="text-sm font-black">↗</div></div>
+                    </div>
+                  </div>
+                </div>
+                <h3 class="mt-7 text-xl font-black">走勢分析</h3>
+                <p class="mt-3 leading-7 text-stone-500">用簡單的戰績與走勢圖回顧近期表現，看懂自己的牌局變化。</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Mobile carousel controls -->
+        <div class="mt-7 flex items-center justify-center gap-5 md:hidden">
+          <button id="prevBtn" type="button" class="grid h-10 w-10 place-items-center rounded-full border border-stone-300 bg-white/50 font-bold" aria-label="上一張">←</button>
+          <div id="dots" class="flex items-center gap-2" aria-label="輪播頁面"></div>
+          <button id="nextBtn" type="button" class="grid h-10 w-10 place-items-center rounded-full border border-stone-300 bg-white/50 font-bold" aria-label="下一張">→</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Steps -->
+    <section id="steps" class="scroll-mt-8 px-6 py-20 md:py-32">
+      <div class="mx-auto max-w-5xl">
+        <div class="text-center">
+          <p class="mb-3 text-sm font-bold tracking-[.16em] text-blue-600">不用學習成本</p>
+          <h2 class="text-3xl font-black md:text-5xl">三步驟開始使用</h2>
+        </div>
+
+        <div class="mt-14 grid gap-5 md:grid-cols-3 md:gap-8">
+          <div class="border-t border-stone-300 pt-6">
+            <span class="text-sm font-black text-blue-600">01</span>
+            <h3 class="mt-4 text-xl font-black">建立房間</h3>
+            <p class="mt-3 leading-7 text-stone-500">建立你們的固定牌局空間，加入常一起打牌的朋友。</p>
+          </div>
+          <div class="border-t border-stone-300 pt-6">
+            <span class="text-sm font-black text-blue-600">02</span>
+            <h3 class="mt-4 text-xl font-black">記錄分數</h3>
+            <p class="mt-3 leading-7 text-stone-500">每一局結束直接輸入結果，讓紀錄跟著牌局即時更新。</p>
+          </div>
+          <div class="border-t border-stone-300 pt-6">
+            <span class="text-sm font-black text-blue-600">03</span>
+            <h3 class="mt-4 text-xl font-black">查看分析</h3>
+            <p class="mt-3 leading-7 text-stone-500">回顧歷史對局與近期走勢，快速掌握每個人的戰績。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="px-6 pb-16 pt-20 md:pb-24 md:pt-28">
+      <div class="paper-card mx-auto max-w-5xl rounded-[32px] px-6 py-16 text-center md:px-12 md:py-24">
+        <h2 class="text-3xl font-black tracking-tight md:text-5xl">準備好開始記錄了嗎？</h2>
+        <p class="mx-auto mt-5 max-w-xl leading-7 text-stone-500">
+          免費建立你的牌局紀錄，下一場開始就不用再找紙筆。
+        </p>
+        <button class="primary-btn js-start mt-8" type="button">開始使用 →</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="px-6 pb-10 text-center text-xs text-stone-400">
+    麻將狗 · 免費麻將對局紀錄工具 · 不涉及金錢交易
+  </footer>
+
+  <script>
+    // CTA：捲動至「三步驟開始使用」
+    document.querySelectorAll(".js-start").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelector("#steps").scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      });
+    });
+
+    // 手機版功能卡片輪播
+    const track = document.querySelector("#carouselTrack");
+    const cards = Array.from(track.querySelectorAll(".carousel-card"));
+    const prevBtn = document.querySelector("#prevBtn");
+    const nextBtn = document.querySelector("#nextBtn");
+    const dotsWrap = document.querySelector("#dots");
+    let currentIndex = 0;
+
+    cards.forEach((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "h-2.5 w-2.5 rounded-full bg-stone-300 transition-all";
+      dot.setAttribute("aria-label", `前往第 ${index + 1} 張`);
+      dot.addEventListener("click", () => goTo(index));
+      dotsWrap.appendChild(dot);
+    });
+
+    const dots = Array.from(dotsWrap.children);
+
+    function updateCarousel() {
+      if (window.innerWidth < 768) {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+      } else {
+        track.style.transform = "";
+      }
+
+      dots.forEach((dot, index) => {
+        dot.className =
+          index === currentIndex
+            ? "h-2.5 w-6 rounded-full bg-blue-600 transition-all"
+            : "h-2.5 w-2.5 rounded-full bg-stone-300 transition-all";
+        dot.setAttribute("aria-current", index === currentIndex ? "true" : "false");
+      });
+    }
+
+    function goTo(index) {
+      currentIndex = (index + cards.length) % cards.length;
+      updateCarousel();
+    }
+
+    prevBtn.addEventListener("click", () => goTo(currentIndex - 1));
+    nextBtn.addEventListener("click", () => goTo(currentIndex + 1));
+    window.addEventListener("resize", updateCarousel);
+
+    // 基本觸控滑動
+    let touchStartX = null;
+    track.addEventListener("touchstart", (event) => {
+      touchStartX = event.touches[0].clientX;
+    }, { passive: true });
+
+    track.addEventListener("touchend", (event) => {
+      if (touchStartX === null || window.innerWidth >= 768) return;
+      const delta = event.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 45) {
+        goTo(delta < 0 ? currentIndex + 1 : currentIndex - 1);
+      }
+      touchStartX = null;
+    }, { passive: true });
+
+    updateCarousel();
+  </script>
+</body>
+</html>
