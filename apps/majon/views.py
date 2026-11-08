@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 from .models import Room, Rule
 
 
-class RoomCreateView(View):
+class RoomCreateView(LoginRequiredMixin, View):
     template_name = "majon/room_form.html"
 
     def get(self, request):
@@ -31,7 +33,12 @@ class RoomCreateView(View):
             context["error"] = "這個房間代碼已被使用，請改用其他代碼。"
             return render(request, self.template_name, context, status=400)
 
-        room = Room.objects.create(name=name, code=code)
+        room = Room.objects.create(
+            name=name,
+            code=code,
+            owner=request.user,
+        )
+
         room.rules.set(Rule.objects.filter(id__in=selected_rule_ids))
 
         return redirect("majon:room-detail", room_id=room.id)
@@ -41,7 +48,7 @@ class RoomCreateView(View):
 class RoomDetailView(View):
     def get(self, request, room_id):
         room = get_object_or_404(
-            Room.objects.select_related("line_group").prefetch_related(
+            Room.objects.select_related("owner", "line_group").prefetch_related(
                 "games",
                 "rules",
             ),
@@ -52,7 +59,8 @@ class RoomDetailView(View):
 class RoomListView(View):
     def get(self, request):
         keyword = request.GET.get("q", "").strip()
-        rooms = Room.objects.all()
+        rooms = Room.objects.select_related("owner")
+        rooms = rooms.filter(owner=request.user)
 
         if keyword:
             rooms = rooms.filter(name__icontains=keyword)

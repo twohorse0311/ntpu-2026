@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+
 
 
 class LineGroup(models.Model):
@@ -35,6 +37,13 @@ class Room(models.Model):
         blank=True,
         verbose_name="麻將規則",
     )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="owned_rooms",
+        verbose_name="建立者",
+    )
+
     line_group = models.OneToOneField(
         LineGroup,
         on_delete=models.SET_NULL,
