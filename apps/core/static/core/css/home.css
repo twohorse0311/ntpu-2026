@@ -1,0 +1,17 @@
+.primary-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; background: var(--blue); color: white; padding: .85rem 1.35rem; font-weight: 700; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; box-shadow: 0 8px 22px rgba(37, 99, 235, .16); }
+.primary-btn:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 10px 26px rgba(37, 99, 235, .22); }
+.phone { width: min(100%, 250px); height: 330px; margin: 0 auto; padding: 10px; border: 2px solid #343434; border-radius: 30px; background: #272727; box-shadow: 0 16px 30px rgba(0, 0, 0, .09); }
+.phone-screen { position: relative; height: 100%; overflow: hidden; border-radius: 21px; background: #fbfaf6; padding: 28px 14px 14px; }
+.phone-screen::before { content: ""; position: absolute; width: 66px; height: 5px; border-radius: 99px; background: #333; top: 10px; left: 50%; transform: translateX(-50%); }
+.mock-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-bottom: 1px solid #e7e1d8; font-size: 12px; }
+.avatar { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; background: #e8edf8; color: #315fae; font-size: 10px; font-weight: 800; }
+.score-pill { border-radius: 999px; padding: 3px 7px; background: #e9f0ff; color: #2859b7; font-size: 10px; font-weight: 800; }
+.chart { position: relative; height: 135px; margin-top: 20px; border-left: 1px solid #ddd7cc; border-bottom: 1px solid #ddd7cc; background: linear-gradient(to bottom, transparent 32%, #ebe6de 33%, transparent 34%, transparent 65%, #ebe6de 66%, transparent 67%); }
+.chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.carousel-track { transition: transform .35s cubic-bezier(.22, .61, .36, 1); }
+.carousel-card { min-width: 100%; }
+
+@media (min-width: 768px) {
+  .carousel-track { transform: none !important; display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+  .carousel-card { min-width: 0; }
+}

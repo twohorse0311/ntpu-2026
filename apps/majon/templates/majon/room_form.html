@@ -1,12 +1,8 @@
-<!doctype html>
-<html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>建立房間｜麻將戰績簿</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="min-h-screen bg-stone-50 text-stone-800">
+{% extends "core/base.html" %}
+
+{% block title %}建立房間｜麻將戰績簿{% endblock %}
+
+{% block content %}
     <main class="mx-auto max-w-xl px-6 py-16">
       <a href="{% url 'majon:room-list' %}" class="text-sm font-semibold text-stone-500 hover:text-blue-600">← 回到房間列表</a>
       <section class="mt-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10">
@@ -52,5 +48,4 @@
         </form>
       </section>
     </main>
-  </body>
-</html>
+{% endblock %}

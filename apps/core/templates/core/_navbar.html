@@ -1,0 +1,33 @@
+<header class="border-b border-stone-200/80 bg-[rgba(247,243,234,.9)] backdrop-blur">
+  <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4" aria-label="主要導覽">
+    <div class="flex items-center gap-5">
+      <a href="{% url 'core:home' %}" class="text-lg font-black tracking-tight text-stone-800">
+        麻將狗
+      </a>
+      <a href="{% url 'majon:room-list' %}" class="text-sm font-bold text-stone-600 transition hover:text-blue-600">
+        我的房間
+      </a>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      {% if user.is_authenticated %}
+        <span class="text-sm font-bold text-stone-600">
+          您好，{{ user.profile.display_name|default:user.username }}
+        </span>
+        <form method="post" action="{% url 'account_logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="rounded-full border border-stone-300 px-4 py-2 text-sm font-bold transition hover:border-stone-400">
+            登出
+          </button>
+        </form>
+      {% else %}
+        <a href="{% url 'account_signup' %}" class="rounded-full border border-stone-300 px-4 py-2 text-sm font-bold transition hover:border-stone-400">
+          註冊
+        </a>
+        <a href="{% url 'account_login' %}" class="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700">
+          登入
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>

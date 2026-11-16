@@ -1,35 +1,8 @@
-<!doctype html>
-<html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>房間列表｜麻將戰績簿</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      :root {
-        --paper: #f7f3ea;
-        --ink: #292929;
-        --line: #ddd7cc;
-      }
+{% extends "core/base.html" %}
 
-      body {
-        margin: 0;
-        background:
-          radial-gradient(circle at 20% 10%, rgba(255, 255, 255, .7), transparent 26rem),
-          var(--paper);
-        color: var(--ink);
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      }
+{% block title %}房間列表｜麻將戰績簿{% endblock %}
 
-      .paper-card {
-        background: rgba(255, 253, 248, .86);
-        border: 1px solid var(--line);
-        box-shadow: 0 12px 36px rgba(55, 48, 38, .05);
-      }
-    </style>
-  </head>
-  <body class="min-h-screen">
+{% block content %}
     <main class="mx-auto max-w-4xl px-6 py-16 sm:px-10 sm:py-24">
       <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -42,25 +15,6 @@
           <span class="rounded-full border border-stone-300 bg-white/50 px-4 py-2 text-sm font-bold text-stone-600">
             {{ rooms|length }} 間房間
           </span>
-      
-          {% if user.is_authenticated %}
-            <span class="text-sm font-bold text-stone-600">
-              您好，{{ user.profile.display_name|default:user.username }}
-            </span>
-            <form method="post" action="{% url 'account_logout' %}">
-              {% csrf_token %}
-              <button type="submit" class="rounded-full border border-stone-300 px-4 py-2 text-sm font-bold">
-                登出
-              </button>
-            </form>
-          {% else %}
-            <a href="{% url 'account_signup' %}" class="rounded-full border border-stone-300 px-4 py-2 text-sm font-bold">
-              註冊
-            </a>
-            <a href="{% url 'account_login' %}" class="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white">
-              登入
-            </a>
-          {% endif %}
         </div>
       </header>
       
@@ -105,5 +59,4 @@
         </a>
       </div>
     </main>
-  </body>
-</html>
+{% endblock %}

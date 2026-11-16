@@ -1,0 +1,17 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}麻將狗{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="min-h-screen {% block body_class %}{% endblock %}">
+    {% block navbar %}{% include "core/_navbar.html" %}{% endblock %}
+    {% block content %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

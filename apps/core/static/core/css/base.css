@@ -1,0 +1,29 @@
+:root {
+  --paper: #f7f3ea;
+  --paper-card: #fffdf8;
+  --ink: #292929;
+  --muted: #77736b;
+  --line: #ddd7cc;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, .7), transparent 26rem),
+    var(--paper);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+
+.paper-card {
+  background: rgba(255, 253, 248, .86);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 36px rgba(55, 48, 38, .05);
+}
