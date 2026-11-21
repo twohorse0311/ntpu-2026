@@ -56,7 +56,7 @@ class RoomDetailView(View):
         )
         return render(request, "majon/room_detail.html", {"room": room})
 
-class RoomListView(View):
+class RoomListView(LoginRequiredMixin, View):
     def get(self, request):
         keyword = request.GET.get("q", "").strip()
         rooms = Room.objects.select_related("owner")
