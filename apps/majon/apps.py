@@ -4,3 +4,6 @@ class MajonConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.majon"
     verbose_name = "麻將戰績簿"
+
+    def ready(self):
+        from . import signals  # noqa: F401

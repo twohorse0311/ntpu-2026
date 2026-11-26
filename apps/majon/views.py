@@ -1,9 +1,15 @@
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views import View
+import time
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views import View
 
 
 from .models import Room, Rule
+from .cache import cache_room_list, get_cached_room_list
 
 
 class RoomCreateView(LoginRequiredMixin, View):
@@ -58,16 +64,68 @@ class RoomDetailView(View):
 
 class RoomListView(LoginRequiredMixin, View):
     def get(self, request):
+        return render(request, "majon/room_list.html")
+
+
+class JsonLoginRequiredMixin(LoginRequiredMixin):
+    def handle_no_permission(self):
+        return JsonResponse(
+            {"error": "authentication_required"},
+            status=401,
+        )
+
+
+class RoomListDataView(JsonLoginRequiredMixin, View):
+    page_size = 10
+
+    def get(self, request):
         keyword = request.GET.get("q", "").strip()
-        rooms = Room.objects.select_related("owner")
-        rooms = rooms.filter(owner=request.user)
+        try:
+            requested_page = int(request.GET.get("page", "1"))
+        except (TypeError, ValueError):
+            requested_page = 1
+        if requested_page < 1:
+            requested_page = 1
+
+        cached_payload = get_cached_room_list(request.user.id, keyword, requested_page)
+        if cached_payload is not None:
+            return JsonResponse(cached_payload)
+
+        rooms = Room.objects.select_related("owner", "owner__profile").filter(
+            owner=request.user
+        )
 
         if keyword:
             rooms = rooms.filter(name__icontains=keyword)
 
-        context = {
-            "rooms": rooms,
-            "keyword": keyword,
+        paginator = Paginator(rooms, self.page_size)
+        page = paginator.get_page(requested_page)
+
+        payload = {
+                "items": [
+                    {
+                        "id": room.id,
+                        "name": room.name,
+                        "code": room.code,
+                        "owner_display_name": self.owner_display_name(room),
+                        "detail_url": reverse(
+                            "majon:room-detail", kwargs={"room_id": room.id}
+                        ),
+                    }
+                    for room in page.object_list
+                ],
+                "page": page.number,
+                "page_size": self.page_size,
+                "total_count": paginator.count,
+                "total_pages": paginator.num_pages,
+                "has_previous": page.has_previous(),
+                "has_next": page.has_next(),
         }
-        return render(request, "majon/room_list.html", context)
+        cache_room_list(request.user.id, keyword, requested_page, payload)
+        return JsonResponse(payload)
+
+    @staticmethod
+    def owner_display_name(room):
+        profile = getattr(room.owner, "profile", None)
+        return profile.display_name if profile and profile.display_name else room.owner.username
 
